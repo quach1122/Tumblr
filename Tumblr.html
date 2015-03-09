@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html ng-app="tumblr">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="public/css/base.css">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <link rel="stylesheet" href="public/css/overrides.css"/>
+    <script>
+        angular.module('tumblr', ['ngRoute']).config(function ($routeProvider, $httpProvider) {
+            $httpProvider.interceptors.push('loadingStatus');
+            $routeProvider.when('/posts', {
+                templateUrl: 'public/partials/posts_view.html',
+                controller: 'searchController'
+            }).when('/posts/link', {
+                templateUrl: 'public/partials/link_view.html',
+                controller: 'searchController'
+            }).when('/posts/photo', {
+                templateUrl: 'public/partials/photo_view.html',
+                controller: 'searchController'
+            }).when('/posts/quote', {
+                templateUrl: 'public/partials/quote_view.html',
+                controller: 'searchController'
+            }).when('/posts/video', {
+                templateUrl: 'public/partials/video_view.html',
+                controller: 'searchController'
+            }).when('/posts/text', {
+                templateUrl: 'public/partials/text_view.html',
+                controller: 'searchController'
+            }).when('/posts/audio', {
+                templateUrl: 'public/partials/audio_view.html',
+                controller: 'searchController'
+            }).when('/posts/chat', {
+                templateUrl: 'public/partials/chat_view.html',
+                controller: 'searchController'
+            }).otherwise({
+                redirectTo: '/posts'
+            })
+        }).controller('searchController', function ($scope, $http, $location, tumblrService) {
+            $scope.search = '';
+            $scope.searchFound = 'false';
+            $scope.postNotFound = '';
+            $scope.currentType = 'Type';
+            $scope.typesOfPosts = ['text', 'quote', 'photo', 'link', 'chat', 'video', 'audio'];
+            $scope.getType = function (type) {
+                $scope.currentType = type;
+            }
+            $scope.searchPost = function () {
+                $location.path('/posts/' + $scope.currentType);
+                return tumblrService.searchResults($scope.search, $scope.currentType).then(function (r) {
+                    var parseResults = JSON.parse(JSON.stringify(r.results));
+                    if (parseResults.posts.length != 0) {
+                        $scope.searchFound = 'false';
+                        $scope.allPosts = parseResults.posts;
+                    }
+                    else {
+                        $scope.searchFound = 'true';
+                        $scope.postNotFound = $scope.search;
+                        $scope.allPosts = '';
+                    }
+//                    console.log(parseResults.posts);
+                });
+            }
+        }).factory('tumblrService', function ($http, $q) {
+            return {
+                searchResults: function (query, ptype) {
+                    var deferred = $q.defer();
+                    $http.jsonp('http://' + query + '.tumblr.com/api/read/json?callback=JSON_CALLBACK&type=' + ptype).success(function (data) {
+                        console.log('data');
+                        deferred.resolve({
+                            results: data
+                        })
+                    }).error(function (msg) {
+                        deferred.reject(msg)
+                    });
+                    return deferred.promise;
+                }
+            }
+        }).factory('loadingStatus', function ($q, $rootScope, $interval) {
+            return {
+                request: function (config) {
+                    $rootScope.$broadcast('loadingStatusActive');
+                    return config;
+                },
+                response: function (response) {
+                    $rootScope.$broadcast('loadingStatusInactive');
+                    return response;
+                },
+                responseError: function (rejection) {
+                    //console.log(rejection);
+                    return $q.reject(rejection);
+                }
+            };
+        }).directive('outerHtmlPost', function () {
+            return {
+                link: function (scope, element, attrs) {
+                    scope: {
+                        postData: '@'
+                    }
+                    attrs.$observe('postData', function (value) {
+                        console.log('attr value ' + value);
+                        if (value != 'false') {
+                            element[0].innerHTML = value;
+                        }
+                        else {
+                            element.css('display', 'none');
+                        }
+                    });
+                }
+            }
+        }).directive('loadingStatusMessage', function () {
+            return {
+                link: function ($scope, element, attrs) {
+
+                    var show = function () {
+                        element.css('visibility', 'visible');
+                    };
+                    var hide = function () {
+                        element.css('visibility', 'hidden');
+                    };
+                    $scope.$on('loadingStatusActive', show);
+                    $scope.$on('loadingStatusInactive', hide);
+                    hide();
+                }
+            };
+        });
+    </script>
+</head>
+<body ng-controller="searchController">
+
+<div id="container" class="panel panel-default">
+    <div class="panel-heading">
+        <img id="logo" src="public/images/t_logo.png" alt="tumblr logo"/>
+
+        <div class="page-header">
+            <h1>Tumblr
+                <small>Find a post</small>
+            </h1>
+        </div>
+
+        <div class="input-group">
+            <div class="dropdown">
+                <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
+                        aria-expanded="true">
+                    {{currentType}}
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                    <li role="presentation"><a role="menuitem" tabindex="-1" ng-repeat="top in typesOfPosts"
+                                               ng-click="getType(top)">{{top}}</a></li>
+                </ul>
+            </div>
+            <input type="text" class="form-control" placeholder="Search for..." ng-model="search"/>
+      <span class="input-group-btn">
+        <button class="btn btn-primary" type="button" ng-click="searchPost()">Search</button>
+      </span>
+
+            <div id="loader-container" loading-status-message style="visibility:hidden;">
+                <h1>Searching...</h1>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <h1 ng-show="searchFound == 'true'" ng-hide="searchFound == 'false'">No Search Found...{{postNotFound}}</h1>
+
+        <div ng-view></div>
+    </div>
+</div>
+</body>
+</html>

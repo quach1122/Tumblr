@@ -1,0 +1,6 @@
+<ol class="list-group">
+    <li ng-repeat="ap in allPosts">
+        <h5>Artist: {{ap["id3-artist"]}} | Title: {{ap["id3-title"]}}</h5>
+        <outer-html-post post-data='{{ap["audio-player"]}}'></outer-html-post>
+    </li>
+</ol>

@@ -1,0 +1,91 @@
+h1 {
+    color: #34465D;
+    padding-bottom: 5px;
+    padding-left: 15px;
+}
+
+h5, ol {
+    color: #ffffff;
+}
+
+ol {
+    margin-left: 10px;
+}
+
+small {
+    margin-left: 25px;
+}
+
+.input-group {
+    width: 500px;
+    margin-left: 25%;
+}
+
+.panel-heading {
+    position: relative;
+}
+
+.page-header {
+    margin-left: 15%;
+}
+
+#logo {
+    position: absolute;
+    width: 155px;
+}
+
+#container {
+    /*margin: 0 auto;*/
+    background-color: #6F7A8A;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdown {
+    margin-right: 0.5em;
+}
+
+.btn-info {
+    width: 100px;
+}
+
+#photo-container {
+    width: 25vh;
+    height: 25vh;
+    align-items: center;
+}
+
+.thumbnail, .btn-info.active, .btn-info.focus, .btn-info:active, .btn-info:focus, .btn-info:hover, .open > .dropdown-toggle.btn-info {
+    background-color: #37465D;
+    border-color: #37465D;
+}
+
+.btn-info {
+    background-color: #6F7A8A;
+    border-color: #6F7A8A;
+}
+
+.panel-body .input-group-btn:last-child > .btn, .input-group-btn:last-child > .btn-group {
+    background-color: #37465D;
+}
+
+.list-group > li > a {
+    color: #ffffff;
+}
+
+#video-container {
+    display: flex;
+    justify-content: space-around;
+}
+
+.panel-body > h1 {
+    padding-left: 30%;
+}
+
+outer-html-post > p > a {
+    color: #000000;
+}
